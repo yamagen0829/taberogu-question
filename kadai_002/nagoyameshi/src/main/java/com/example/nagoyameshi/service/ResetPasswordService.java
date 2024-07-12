@@ -1,0 +1,65 @@
+package com.example.nagoyameshi.service;
+
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+
+import com.example.nagoyameshi.PasswordResetDto;
+import com.example.nagoyameshi.entity.User;
+import com.example.nagoyameshi.repository.UserRepository;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+
+@Service
+public class ResetPasswordService {
+     @Autowired
+     private UserRepository userRepository;
+     
+     @Autowired
+     private JavaMailSender mailSender;
+     
+     public void sendResetToken(String email) {
+    	 User user = userRepository.findByEmail(email);
+    	 if (user !=null) {
+    		 String token = UUID.randomUUID().toString();
+    		 user.setResetToken(token);
+    		 userRepository.save(user);
+    		 
+    		 String resetUrl = "http://localhost:8080/resetPassword?token=" + token;
+    		 
+    		 try {
+    			 sendEmail(email, resetUrl);
+    		 } catch (MessagingException e) {
+    			 e.printStackTrace();
+    		 }
+    	 }
+     }
+     
+     private void sendEmail(String to, String resetUrl) throws MessagingException {
+    	 MimeMessage message = mailSender.createMimeMessage();
+    	 MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    	 helper.setTo(to);
+    	 helper.setSubject("パスワードリセット");
+    	 helper.setText("以下のリンクをクリックしてパスワードをリセットしてください\n" + resetUrl, true);
+    	 mailSender.send(message);
+     }
+     
+     //トークン検証
+     public boolean validateResetPasswordToken(String token) {
+    	 User user = userRepository.findByResetToken(token);
+    	 return user != null;
+     }
+     
+     public void updatePassword(PasswordResetDto form) {
+    	 User user = userRepository.findByResetToken(form.getToken());
+    	 if (user != null) {
+    		 user.setPassword(form.getNewPassword());
+    		 user.setResetToken(null);
+    		 userRepository.save(user);
+    	 } 
+     }
+}

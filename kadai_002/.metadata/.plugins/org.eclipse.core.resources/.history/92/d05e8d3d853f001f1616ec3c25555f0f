@@ -1,0 +1,33 @@
+package com.example.nagoyameshi.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.example.nagoyameshi.service.ResetPasswordService;
+
+@Controller
+public class ResetPasswordController {
+    @Autowired
+    private ResetPasswordService resetPasswordService;
+	
+	
+	@GetMapping("/resetPassword")
+	public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
+	    if (!resultPasswordService.validateResetPasswordToken(token)) {
+	        model.addAttribute("message", "Invalid Token");
+	        return "redirect:/login?error=true";
+	    }
+	    model.addAttribute("token", token);
+	    return "resetPasswordForm";
+	}
+	@PostMapping("/resetPassword")
+	public String handlePasswordReset(@ModelAttribute PasswordResetDto form, Model model) {
+	    resetPasswordService.updatePassword(form);
+	    return "redirect:/login?resetSuccess=true";
+	}
+}

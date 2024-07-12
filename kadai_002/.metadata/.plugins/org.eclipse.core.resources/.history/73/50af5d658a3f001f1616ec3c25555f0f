@@ -1,0 +1,10 @@
+package com.example.nagoyameshi;
+
+
+＠Date
+public class PasswordResetDto {
+     private String token;
+     private String newPassword;
+     
+     // Getter and setters
+}
