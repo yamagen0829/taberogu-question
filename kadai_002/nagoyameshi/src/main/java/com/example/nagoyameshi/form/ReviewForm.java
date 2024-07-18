@@ -1,0 +1,14 @@
+package com.example.nagoyameshi.form;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class ReviewForm {
+    @NotBlank(message = "1~5段階で評価をお願いします。")
+    private Integer score;
+    
+    @NotBlank(message = "コメントをお願いします。")
+    private String content;
+    
+}

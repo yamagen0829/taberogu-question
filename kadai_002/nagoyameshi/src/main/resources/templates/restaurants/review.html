@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+ <html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">    
+     <head>
+         <div th:replace="~{fragment :: meta}"></div>   
+              
+         <div th:replace="~{fragment :: styles}"></div>
+           
+         <title>店舗詳細</title>   
+     </head>
+     <body>
+         <div class="nagoyameshi-wrapper">
+             <!-- ヘッダー -->
+             <div th:replace="~{fragment :: header}"></div>
+             
+             <main>
+                 <div class="container pt-4 pb-5 nagoyameshi-container">
+                     <div class="row justify-content-center">
+                         <div class="col-xxl-9 col-xl-10 col-lg-11">
+                             <nav class="mb-4" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                                 <ol class="breadcrumb mb-0">                        
+                                     <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+                                     <li class="breadcrumb-item"><a th:href="@{/restaurants}">店舗一覧</a></li>
+                                     <li class="breadcrumb-item"><a th:href="@{/restaurants/show}"店舗詳細></a></li>
+                                     <li class="breadcrumb-item active" aria-current="page">レビュー一覧</li>
+                                 </ol>
+                             </nav> 
+                            
+                             <h1 class="mb-4 text-center" th:text="${restaurant.getName()}">レビュー一覧</h1>                                                              
+                                     <!-- レビュー機能 -->
+                                    <div> 
+	                                     <h2 class="mb-4 text-center">レビュー</h2>
+		                                 <div th:if="${not #lists.isEmpty(reviews)}">
+	                                          <ul>
+	                                              <li th:each="review : ${reviews}">
+	                                                  <div class="review-item">
+	                                                      <p th:text="${review.content}"></p>
+	                                                      <small>投稿者: <span th:text="${review.userId}"></span></small>
+	                                                  </div>
+	                                              </li>
+	                                          </ul>
+	                                     </div>
+	                                     <div th:unless="${not #lists.isEmpty(reviews)}">
+	                                          <p>レビューがありません。</p>
+	                                     </div>
+	                                        <a th:href="@{/review/reviewedit}" class="btn text-white shadow-sm w-50 nagoyameshi-btn">投稿</a>
+	                                        <a th:href="@{/review/reviewpost}" class="btn text-white shadow-sm w-50 nagoyameshi-btn">編集</a>
+	                                    
+	                                     <!-- 削除用モーダル -->
+                                         <div class="modal fade" th:id="${'deleteReviewModal' + review.getId()}" tabindex="-1" th:aria-labelledby="${'deleteReviewModalLabel' + review.getId()}">
+                                             <div class="modal-dialog">
+                                                 <div class="modal-content">
+                                                     <div class="modal-header">
+                                                         <h5 class="modal-title" th:id="${'deleteReviewModalLabel' + review.getId()}" th:text="${review.getName() + 'を削除してもよろしいですか？'}"></h5>
+                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+                                                     </div>
+                                                     <div class="modal-footer">
+                                                         <form method="post"th:action="@{/restaurant/reviews/__${review.getId()}__/delete}">
+                                                             <button type="submit" class="btn nagoyameshi-btn-danger text-white shadow-sm">削除</button>
+                                                         </form>
+                                                     </div>
+                                                 </div>
+                                             </div>
+                                         </div>    
+	                                </div>                                                                                                   
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </main>
+             
+             <!-- フッター -->
+             <div th:replace="~{fragment :: footer}"></div>
+         </div>    
+         
+         <div th:replace="~{fragment :: scripts}"></div>  
+   </body>
+ </html>

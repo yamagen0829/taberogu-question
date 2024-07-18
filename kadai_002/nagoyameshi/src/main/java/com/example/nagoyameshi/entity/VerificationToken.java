@@ -1,6 +1,8 @@
 package com.example.nagoyameshi.entity;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,9 +30,17 @@ public class VerificationToken {
      @Column(name = "token")
      private String token;
      
+     @Column(name = "expiry_date")
+     private Timestamp expiryDate;
+     
      @Column(name = "created_at", insertable = false, updatable = false)
      private Timestamp createdAt;
      
      @Column(name = "updated_at", insertable = false, updatable = false)
-     private Timestamp updatedAt;   
+     private Timestamp updatedAt; 
+     
+  // デフォルトのコンストラクタでexpiryDateを1日後に設定
+     public VerificationToken() {
+         this.expiryDate = Timestamp.from(Instant.now().plus(1, ChronoUnit.DAYS));
+     }
 }

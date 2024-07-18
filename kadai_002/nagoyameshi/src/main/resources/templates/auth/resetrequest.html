@@ -15,6 +15,10 @@
              <main>
                  <div class="container">
 					 <h2>パスワードリセット</h2>
+					 
+					 <!-- メッセージ表示部分 -->
+               　　　 <div th:if="${message}" th:text="${message}" class="alert alert-info"></div>
+
 					 <form th:action="@{/resetpassword/request}" method="post">
 						 <div class="form-group">
 							 <label for="email">メールアドレス:</label>

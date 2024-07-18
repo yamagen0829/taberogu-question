@@ -36,3 +36,20 @@ INSERT IGNORE INTO users (id, name, furigana, postal_code, address, phone_number
 INSERT IGNORE INTO users (id, name, furigana, postal_code, address, phone_number, email, password, role_id, enabled) VALUES (3, '侍 義勝', 'サムライ ヨシカツ', '638-0644', '奈良県五條市西吉野町湯川X-XX-XX', '090-1234-5678', 'yoshikatsu.samurai@example.com', 'password', 1, false);
 INSERT IGNORE INTO users (id, name, furigana, postal_code, address, phone_number, email, password, role_id, enabled) VALUES (4, '侍 幸美', 'サムライ サチミ', '342-0006', '埼玉県吉川市南広島X-XX-XX', '090-1234-5678', 'sachimi.samurai@example.com', 'password', 1, false);
 INSERT IGNORE INTO users (id, name, furigana, postal_code, address, phone_number, email, password, role_id, enabled) VALUES (5, '侍 雅', 'サムライ ミヤビ', '527-0209', '滋賀県東近江市佐目町X-XX-XX', '090-1234-5678', 'miyabi.samurai@example.com', 'password', 1, false);
+
+-- verification_tokens テーブル
+INSERT IGNORE INTO verification_tokens (user_id, token, expiry_date) VALUES (1, 'example_token', DATE_ADD(NOW(), INTERVAL 1 DAY));
+
+-- reviews テーブル
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (1, 1, 1, '美味しかった。', 5, '2023-08-03', '2023-08-04' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (2, 2, 2, 'うまい！', 4, '2023-08-04', '2023-08-05' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (3, 3, 3, '素晴らしかった。', 3, '2023-08-07', '2023-08-07' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (4, 4, 4, '接客も良かった。', 4, '2023-08-08', '2023-08-08' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (5, 5, 5, 'いまいち。', 1, '2023-08-03', '2023-08-04' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (6, 6, 6, 'いまひとつ。', 2, '2023-08-04', '2023-08-04' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (7, 7, 1, '美味しい！', 4, '2023-08-05', '2023-08-05' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (8, 8, 2, '味が素晴らしい', 5, '2023-08-09','2023-08-09' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (9, 9, 3, 'すごかった', 4, '2023-08-03','2023-08-04' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (10, 10, 4, '美味しかった。', 4, '2023-08-02','2023-08-02' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (11, 11, 5, '味がいまいち。', 1, '2023-08-02','2023-08-01' );
+INSERT IGNORE INTO reviews (id, restaurant_id, user_id, content, score, created_at, updated_at) VALUES (12, 12, 6, '味がうまい。', 3, '2023-08-02','2023-08-01' );

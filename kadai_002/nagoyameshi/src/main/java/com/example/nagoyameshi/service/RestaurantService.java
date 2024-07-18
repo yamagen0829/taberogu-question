@@ -116,5 +116,9 @@ public class RestaurantService {
         } catch (IOException e) {
             e.printStackTrace();
         }          
-    } 
+    }
+
+	public Restaurant findById(Integer id) {
+		return restaurantRepository.findById(id).orElse(null);
+	} 
 }
