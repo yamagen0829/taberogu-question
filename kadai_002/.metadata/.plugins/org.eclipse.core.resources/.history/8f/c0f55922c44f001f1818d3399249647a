@@ -1,0 +1,88 @@
+package com.example.nagoyameshi.controller;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.example.nagoyameshi.entity.Restaurant;
+import com.example.nagoyameshi.entity.User;
+import com.example.nagoyameshi.repository.RestaurantRepository;
+import com.example.nagoyameshi.service.FavoriteService;
+import com.example.nagoyameshi.service.UserService;
+
+@Controller
+public class FavoriteController {
+	private final FavoriteService favoriteService;
+    private final RestaurantRepository restaurantRepository;
+    private final UserService userService;
+
+    public FavoriteController(FavoriteService favoriteService, RestaurantRepository restaurantRepository, UserService userService) {
+        this.favoriteService = favoriteService;
+        this.restaurantRepository = restaurantRepository;
+        this.userService = userService;
+    }
+
+    @GetMapping("/{id}/details")
+    public String showRestaurantDetails(@PathVariable(name = "id") Integer id, Model model, RedirectAttributes redirectAttributes) {
+	    try {
+	    	Restaurant restaurant = restaurantRepository.findById(id).orElseThrow();
+	    
+	        User currentUser = userService.getCurrentUser();
+	
+	        boolean isFavorite = currentUser != null && favoriteService.isFavorite(currentUser.getId(), id);
+	        
+	
+	        model.addAttribute("restaurant", restaurant);
+	        model.addAttribute("isFavorite", isFavorite);
+	
+	        return "restaurants/favorite";  
+	    }
+
+    @PostMapping("/restaurants/{id}/favorite")
+    public String addFavorite(@PathVariable(name = "id") Integer id, RedirectAttributes redirectAttributes) {
+        User currentUser = userService.getCurrentUser();
+        if (currentUser != null) {
+            favoriteService.addFavorite(id, currentUser.getId());
+
+            redirectAttributes.addFlashAttribute("message", "お気に入りを追加しました。");
+        }
+
+        return "redirect:/" + id + "/favorite";
+    }
+
+    @PostMapping("/restaurants/{id}/unfavorite")
+    public String removeFavorite(@PathVariable(name = "id") Integer id, RedirectAttributes redirectAttributes) {
+        User currentUser = userService.getCurrentUser();
+        if (currentUser != null) {
+            favoriteService.removeFavorite(id, currentUser.getId());
+
+            redirectAttributes.addFlashAttribute("message", "お気に入りを解除しました。");
+        }
+        return "redirect:/" + id + "/favorite";
+    }
+
+    @GetMapping("/favorites")
+    public String showFavorites(@RequestParam(defaultValue = "0") int page, Model model, RedirectAttributes redirectAttributes) {
+    	try {
+	        User currentUser = userService.getCurrentUser();
+	        if (currentUser != null) {
+	            Pageable pageable = PageRequest.of(page, 10); // 1ページあたり10件表示
+	            Page<Restaurant> favoritePage = favoriteService.getFavoritesByUserId(currentUser.getId(), pageable); 
+	            model.addAttribute("favoritePage", favoritePage);
+	        }
+    	} catch (Exception e) {
+    		  // エラーログを出力
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "お気に入りの取得中にエラーが発生しました: " + e.getMessage());
+            return "redirect:/errorPage";
+        }
+	        return "restaurants/favorites";  // お気に入り一覧を表示するためのThymeleafテンプレート
+    }
+} 

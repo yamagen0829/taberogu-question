@@ -1,0 +1,19 @@
+package com.example.nagoyameshi.controller;
+
+public class ReservationController {
+	private final ReservationRepository reservationRepository;      
+    
+    public ReservationController(ReservationRepository reservationRepository) {        
+        this.reservationRepository = reservationRepository;              
+    }    
+
+    @GetMapping("/reservations")
+    public String index(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, @PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable, Model model) {
+        User user = userDetailsImpl.getUser();
+        Page<Reservation> reservationPage = reservationRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+        
+        model.addAttribute("reservationPage", reservationPage);         
+        
+        return "reservations/index";
+    }
+}

@@ -1,0 +1,35 @@
+spring.application.name=nagoyameshi
+
+spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:3306/nagoyameshi_db
+spring.datasource.username=root
+spring.datasource.password=Ilovemusic1
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.sql.init.encoding=utf-8
+spring.sql.init.mode=always
+
+spring.servlet.multipart.max-file-size=5MB
+
+spring.mail.host=smtp.gmail.com
+ spring.mail.port=587
+ spring.mail.username=yamagen3745@gmail.com
+ spring.mail.password=zjzv njpg rvnq rezy
+ spring.mail.properties.mail.smtp.auth=true
+ spring.mail.properties.mail.smtp.starttls.enable=true
+
+
+# Spring Securityの設定
+spring.security.user.name=user
+spring.security.user.password=password
+# セッションタイムアウト設定
+server.session.timeout=1200
+# 通常のSpring設定（例：ポート番号、データベース接続など）
+server.port=8080
+
+# application.yml または application.properties でログレベルを調整
+logging:
+  level:
+    org.springframework.web: DEBUG
+
+# application.properties
+server.error.whitelabel.enabled=false
+server.error.path=/error

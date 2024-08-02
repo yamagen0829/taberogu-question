@@ -1,0 +1,72 @@
+package com.example.nagoyameshi.controller;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.example.nagoyameshi.entity.Restaurant;
+import com.example.nagoyameshi.entity.User;
+import com.example.nagoyameshi.repository.RestaurantRepository;
+import com.example.nagoyameshi.service.FavoriteService;
+import com.example.nagoyameshi.service.UserService;
+
+@Controller
+public class FavoriteController {
+	private final FavoriteService favoriteService;
+    private final RestaurantRepository restaurantRepository;
+    private final UserService userService;
+    
+    
+    public FavoriteController(FavoriteService favoriteService, RestaurantRepository restaurantRepository, UserService userService) {
+    	this.favoriteService = favoriteService;
+        this.restaurantRepository = restaurantRepository;
+        this.userService = userService;
+    }
+    
+    @GetMapping("/{id}/favorite")
+    public String showRestaurantDetails(@PathVariable(name = "id") Integer id, Model model) {
+        Restaurant restaurant = restaurantRepository.findById(id).orElseThrow();
+        User currentUser = userService.getCurrentUser();
+
+        boolean isFavorite = false;
+        if (currentUser != null) {
+            isFavorite = favoriteService.isFavorite(currentUser.getId(), id);
+        }
+
+        model.addAttribute("restaurant", restaurant);
+        model.addAttribute("isFavorite", isFavorite);
+
+        return "restaurants/favorite";  
+    }
+    
+    @PostMapping("/restaurants/{id}/favorite")
+    public String addFavorite(@PathVariable(name = "id") Integer id) {
+        User currentUser = userService.getCurrentUser();
+        if (currentUser != null) {
+            favoriteService.addFavorite(currentUser.getId(), id);
+            
+         model.addAttributes("message", "お気に入りを追加しました。" );
+        }
+        
+        return "redirect:/" + id + "/favorite";
+    }
+
+    @PostMapping("/restaurants/{id}/unfavorite")
+    public String removeFavorite(@PathVariable(name = "id") Integer id) {
+        User currentUser = userService.getCurrentUser();
+        if (currentUser != null) {
+            favoriteService.removeFavorite(currentUser.getId(), id);
+            
+            model.addAttributes("message", "お気に入りを解除しました。" );
+               
+        }
+        
+        
+        
+        return "redirect:/" + id + "/favorite";
+    }
+}

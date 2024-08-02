@@ -1,0 +1,19 @@
+package com.example.nagoyameshi.form;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class ReserviationRegisterForm {
+	private Integer restaurantId;
+	
+	private Integer userId;
+	
+	private String ReservedDatetime;
+	
+	private Integer numberOfpeople;
+	
+	private Integer amount;
+    
+}

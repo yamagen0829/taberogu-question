@@ -1,0 +1,47 @@
+package com.example.nagoyameshi.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.nagoyameshi.entity.Favorite;
+import com.example.nagoyameshi.entity.Restaurant;
+import com.example.nagoyameshi.entity.User;
+import com.example.nagoyameshi.repository.FavoriteRepository;
+import com.example.nagoyameshi.repository.RestaurantRepository;
+import com.example.nagoyameshi.repository.UserRepository;
+
+@Service
+public class FavoriteService {
+	private final FavoriteRepository favoriteRepository;  
+    private final RestaurantRepository restaurantRepository;  
+    private final UserService userService;  
+    
+    public FavoriteService(FavoriteRepository favoriteRepository, RestaurantRepository restaurantRepository, UserService userService) {
+        this.favoriteRepository = favoriteRepository;  
+        this.restaurantRepository = restaurantRepository;  
+        this.userService = userService;  
+    }
+    
+    @Transactional
+    public void addFavorite(Integer restaurantId) {
+        // ログインしているユーザーを取得する（一例）
+        User user = userRepository.findById(1).orElseThrow(); // 一例としてID=1のユーザーを取得
+        Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow();
+
+        Favorite favorite = new Favorite();
+        favorite.setUser(user);
+        favorite.setRestaurant(restaurant);
+
+        favoriteRepository.save(favorite);
+    }
+
+    @Transactional
+    public void removeFavorite(Integer restaurantId) {
+        // ログインしているユーザーを取得する（一例）
+        User user = userRepository.findById(1).orElseThrow(); // 一例としてID=1のユーザーを取得
+        Favorite favorite = favoriteRepository.findByUserIdAndRestaurantId(user.getId(), restaurantId)
+                .orElseThrow();
+
+        favoriteRepository.delete(favorite);
+    }
+}

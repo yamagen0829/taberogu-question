@@ -1,0 +1,20 @@
+package com.example.nagoyameshi.service;
+
+import java.time.LocalDate;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class ReservationService {
+  // 人数が定員以下かどうかをチェックする
+	public boolean isWithinNumberOfSeat(Integer numberOfPeople, Integer numberOfSeat) {
+		return numberOfPeople <= numberOfSeat;
+	}
+
+  // 料金を計算する
+	public Integer calculateAmount(LocalDate reservationDate, LocalDate reservationTime, Integer price) {
+		Integer onePerson = price;
+		int amount = price * (int)onePerson;
+		return amount;
+	}
+}

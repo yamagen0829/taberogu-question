@@ -1,5 +1,6 @@
 package com.example.nagoyameshi.service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,8 @@ public class ResetPasswordService {
 	    
 	    @Transactional
 	    public void sendResetToken(String email) {
-	        User user = userRepository.findByEmail(email);
-	        if (user != null) {
+	        Optional<User> optionalUser = userRepository.findByEmail(email);
+	        optionalUser.ifPresent(user -> {
 	            String token = UUID.randomUUID().toString();
 	            verificationTokenService.update(user, token);
 	            
@@ -51,7 +52,7 @@ public class ResetPasswordService {
 	            } catch (MessagingException e) {
 	                e.printStackTrace();
 	            }
-	        }
+	        });
 	    }
 	    
 	    private void sendEmail(String to, String resetUrl) throws MessagingException {

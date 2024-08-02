@@ -1,5 +1,7 @@
 package com.example.nagoyameshi.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -12,15 +14,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.nagoyameshi.entity.Restaurant;
+import com.example.nagoyameshi.entity.Review;
+import com.example.nagoyameshi.entity.User;
+import com.example.nagoyameshi.form.ReservationInputForm;
 import com.example.nagoyameshi.repository.RestaurantRepository;
+import com.example.nagoyameshi.repository.ReviewRepository;
+import com.example.nagoyameshi.service.FavoriteService;
+import com.example.nagoyameshi.service.UserService;
 
 @Controller
 @RequestMapping("/restaurants")
 public class RestaurantController {
-	private final RestaurantRepository restaurantRepository;        
+	private final RestaurantRepository restaurantRepository;
+	private final ReviewRepository reviewRepository;
+//	private final FavoriteRepository favoriteRepository;
+	private final FavoriteService favoriteService;
+	private final UserService userService;
     
-    public RestaurantController(RestaurantRepository restaurantRepository) {
-        this.restaurantRepository = restaurantRepository;            
+    public RestaurantController(RestaurantRepository restaurantRepository, ReviewRepository reviewRepository, FavoriteService favoriteService, UserService userService) {
+        this.restaurantRepository = restaurantRepository; 
+        this.reviewRepository = reviewRepository;
+//        this.favoriteRepository = favoriteRepository;
+        this.favoriteService = favoriteService;
+        this.userService = userService;
     }     
   
     @GetMapping
@@ -37,26 +53,38 @@ public class RestaurantController {
         if (keyword != null && !keyword.isEmpty()) {
         	if (order != null && order.equals("priceAsc")) {
                 restaurantPage = restaurantRepository.findByNameLikeOrAddressLikeOrderByPriceAsc("%" + keyword + "%", "%" + keyword + "%", pageable);
+            } else if (order != null && order.equals("scoreDesc")) {
+                restaurantPage = restaurantRepository.findByNameOrAddressOrderByAverageScoreDesc("%" + keyword + "%", "%" + keyword + "%", pageable);
             } else {
                 restaurantPage = restaurantRepository.findByNameLikeOrAddressLikeOrderByCreatedAtDesc("%" + keyword + "%", "%" + keyword + "%", pageable);
             } 
         } else if (address != null && !address.isEmpty()) {
         	if (order != null && order.equals("priceAsc")) {
                 restaurantPage = restaurantRepository.findByAddressLikeOrderByPriceAsc("%" + address + "%", pageable);
+            } else if (order != null && order.equals("scoreDesc")) {
+                restaurantPage = restaurantRepository.findByAddressOrderByAverageScoreDesc("%" + address + "%", pageable); 
             } else {
                 restaurantPage = restaurantRepository.findByAddressLikeOrderByCreatedAtDesc("%" + address + "%", pageable);
             }  
         } else if (price != null) {
         	if (order != null && order.equals("priceAsc")) {
                 restaurantPage = restaurantRepository.findByPriceLessThanEqualOrderByPriceAsc(price, pageable);
+            } else if (order != null && order.equals("scoreDesc")) {
+                restaurantPage = restaurantRepository.findByPriceOrderByAverageScoreDesc(price, pageable); 
             } else {
                 restaurantPage = restaurantRepository.findByPriceLessThanEqualOrderByCreatedAtDesc(price, pageable);
             }
         } else if (category != null && !category.isEmpty()) {
-        	restaurantPage = restaurantRepository.findByCategoryNameContaining(category, pageable);
-        } else {
+        	if(order != null && order.equals("scoreDesc")) {
+        	    restaurantPage = restaurantRepository.findByCategoryNameOrderByAverageScoreDesc(category, pageable);
+        	} else {
+        		restaurantPage = restaurantRepository.findByCategoryNameContaining(category, pageable);
+        	}
+        } else { 
         	if (order != null && order.equals("priceAsc")) {
                 restaurantPage = restaurantRepository.findAllByOrderByPriceAsc(pageable);
+            } else if (order != null && order.equals("scoreDesc")) {
+                restaurantPage = restaurantRepository.findAllOrderByAverageScoreDesc(pageable); 
             } else {
                 restaurantPage = restaurantRepository.findAllByOrderByCreatedAtDesc(pageable);   
             }
@@ -71,13 +99,58 @@ public class RestaurantController {
         
         return "restaurants/index";
     }
-    
+      
     @GetMapping("/{id}")
     public String show(@PathVariable(name = "id") Integer id, Model model) {
-        Restaurant restaurant = restaurantRepository.getReferenceById(id);
+        Restaurant restaurant = restaurantRepository.findById(id).orElseThrow();
+        List<Review> reviews = reviewRepository.findByRestaurant_Id(id);
+        User currentUser = userService.getCurrentUser();
+        boolean isFavorite = currentUser != null && favoriteService.isFavorite(currentUser.getId(), id);
         
-        model.addAttribute("restaurant", restaurant);         
+        model.addAttribute("restaurant", restaurant);
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("reservationInputForm", new ReservationInputForm());
+        model.addAttribute("isFavorite", isFavorite); 
         
         return "restaurants/show";
-    }    
+    }
+    
+//    @GetMapping("/{id}")
+//    public String show(@PathVariable(name = "id") Integer id, Model model) {
+//        Restaurant restaurant = restaurantRepository.getReferenceById(id);
+//        List<Review> reviews = reviewRepository.findByRestaurant_Id(id);
+//        
+//        model.addAttribute("restaurant", restaurant);
+//        model.addAttribute("reservationInputForm", new ReservationInputForm());
+//        model.addAttribute("reviews", reviews);
+//        
+//        return "restaurants/show";
+//    } 
+//    
+//    @GetMapping("/{id}/review")
+//    public String review(@PathVariable(name = "id") Integer id, Model model) {
+//        Restaurant restaurant = restaurantRepository.getReferenceById(id);
+//        List<Review> reviews = reviewRepository.findByRestaurant_Id(id);
+//        
+//        model.addAttribute("restaurant", restaurant);
+//        model.addAttribute("reviews", reviews);
+//        
+//        return "restaurants/review";
+//    }
+//    
+//    @GetMapping("/{id}/favorite")
+//    public String showRestaurantDetails(@PathVariable(name = "id") Integer id, Model model) {
+//        Restaurant restaurant = restaurantRepository.findById(id).orElseThrow();
+//        User user = userService.getCurrentUser();
+//        
+//        boolean isFavorite = false;
+//        if (user != null) {
+//            isFavorite = favoriteRepository.findByUserIdAndRestaurantId(user.getId(), id).isPresent();
+//        }
+//        
+//        model.addAttribute("restaurant", restaurant);
+//        model.addAttribute("isfavorite", isFavorite);
+//        
+//        return "restaurants/show";
+//    }
 }

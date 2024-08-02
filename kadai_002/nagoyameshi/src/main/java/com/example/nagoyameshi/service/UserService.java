@@ -1,9 +1,13 @@
 package com.example.nagoyameshi.service;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.nagoyameshi.UserNotFoundException;
 import com.example.nagoyameshi.entity.Role;
 import com.example.nagoyameshi.entity.User;
 import com.example.nagoyameshi.form.SignupForm;
@@ -36,7 +40,8 @@ public class UserService {
          user.setEmail(signupForm.getEmail());
          user.setPassword(passwordEncoder.encode(signupForm.getPassword()));
          user.setRole(role);
-         user.setEnabled(false);        
+         user.setEnabled(false);
+         user.setPaid(false);
          
          return userRepository.save(user);
      }  
@@ -57,8 +62,7 @@ public class UserService {
      
      // メールアドレスが登録済みかどうかをチェックする
      public boolean isEmailRegistered(String email) {
-         User user = userRepository.findByEmail(email);  
-         return user != null;
+         return userRepository.findByEmail(email).isPresent();  
      }
      
      // パスワードとパスワード（確認用）の入力値が一致するかどうかをチェックする
@@ -77,5 +81,49 @@ public class UserService {
      public boolean isEmailChanged(UserEditForm userEditForm) {
          User currentUser = userRepository.getReferenceById(userEditForm.getId());
          return !userEditForm.getEmail().equals(currentUser.getEmail());      
+     }
+     
+     public User getCurrentUser() {
+    	// Spring Securityを使って現在のログインユーザーを取得する
+//         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//         String currentUserName = authentication.getName();
+//         return userRepository.findByEmail(currentUserName) 
+//        		 .orElseThrow(() -> new UserNotFoundException("Current user not found"));
+    	 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+         if (authentication == null || !authentication.isAuthenticated()) {
+             return null;
+         }
+
+         Object principal = authentication.getPrincipal();
+         if (principal instanceof UserDetails) {
+             String username = ((UserDetails) principal).getUsername();
+             return userRepository.findByEmail(username)
+             		.orElseThrow(() -> new UserNotFoundException("User not found"));
+         } else {
+             return null;
+         }
+     }
+     
+     @Transactional
+     public void upgrade(Integer id) {
+         User user = userRepository.findById(id)
+             .orElseThrow(() -> new UserNotFoundException("User not found"));
+         user.setPaid(true);
+         userRepository.save(user);
+     }
+
+     @Transactional
+     public void downgrade(Integer id) {
+         User user = userRepository.findById(id)
+             .orElseThrow(() -> new UserNotFoundException("User not found"));
+         user.setPaid(false);
+         userRepository.save(user);
+     }
+
+     @Transactional
+     public void cancel(Integer id) {
+         User user = userRepository.findById(id)
+             .orElseThrow(() -> new UserNotFoundException("User not found"));
+         userRepository.delete(user);
      }
 }

@@ -1,0 +1,11 @@
+package com.example.nagoyameshi.service;
+
+import com.example.nagoyameshi.repository.ReservationRepository;
+import com.example.nagoyameshi.repository.RestaurantRepository;
+import com.example.nagoyameshi.repository.UserRepository;
+
+public class FavoriteService {
+	private final FavoriteRepository favoriteRepository;  
+    private final RestaurantRepository restaurantRepository;  
+    private final UserRepository userRepository;  
+}

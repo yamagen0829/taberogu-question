@@ -1,0 +1,31 @@
+package com.example.nagoyameshi.entity;
+
+public class Reservation {
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+    
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant; 
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;     
+    
+    @Column(name = "reseraved_datetime")
+    private LocalDate reservedDatetime;
+    
+    @Column(name = "number_of_people")
+    private Integer numberOfPeople; 
+    
+    @Column(name = "price")
+    private Integer price;     
+    
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private Timestamp createdAt;
+    
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private Timestamp updatedAt;   
+}

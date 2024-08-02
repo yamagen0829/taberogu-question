@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.nagoyameshi.entity.User;
@@ -64,5 +65,45 @@ public class UserController {
         redirectAttributes.addFlashAttribute("successMessage", "会員情報を編集しました。");
         
         return "redirect:/user";
-    }    
+    } 
+    
+    @GetMapping("/paid")
+    public String showPaidRegistration(Model model) {
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
+        return "user/paid";
+    }
+    
+    @PostMapping("/upgrade")
+    public String upgrade(@RequestParam("userId") Integer userId, RedirectAttributes redirectAttributes) {
+        try {
+            userService.upgrade(userId);
+            redirectAttributes.addFlashAttribute("successMessage", "有料会員へアップグレードしました。");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }  
+        return "redirect:/user";
+    }
+    
+    @PostMapping("/downgrade")
+    public String downgrade(@RequestParam("userId") Integer userId, RedirectAttributes redirectAttributes) {
+        try {
+            userService.downgrade(userId);
+            redirectAttributes.addFlashAttribute("successMessage", "無料会員へダウングレードしました。");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }  
+        return "redirect:/user";
+    }
+
+    @PostMapping("/cancel")
+    public String cancel(@RequestParam("userId") Integer userId, RedirectAttributes redirectAttributes) {
+        try {
+            userService.cancel(userId);
+            redirectAttributes.addFlashAttribute("successMessage", "退会が完了しました。");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }  
+        return "redirect:/";
+    }
 }

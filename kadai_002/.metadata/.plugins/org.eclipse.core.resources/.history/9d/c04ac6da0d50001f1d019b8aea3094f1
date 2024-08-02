@@ -1,0 +1,86 @@
+package com.example.nagoyameshi.controller;
+
+
+import java.security.Principal;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.example.nagoyameshi.entity.Restaurant;
+import com.example.nagoyameshi.entity.Review;
+import com.example.nagoyameshi.form.ReviewForm;
+import com.example.nagoyameshi.repository.ReviewRepository;
+import com.example.nagoyameshi.service.RestaurantService;
+import com.example.nagoyameshi.service.ReviewService;
+
+import jakarta.validation.Valid;
+
+@Controller
+//@RequestMapping("/restaurants/{id}")
+public class ReviewController {
+    private final ReviewService reviewService;
+    private final ReviewRepository reviewRepository;
+    private final RestaurantService restaurantService;
+    
+    public ReviewController(ReviewService reviewService, ReviewRepository reviewRepository, RestaurantService restaurantService) {
+    	this.reviewService = reviewService;
+    	this.reviewRepository = reviewRepository;
+    	this.restaurantService = restaurantService;
+    }
+     
+    @GetMapping("/restaurants/{id}/reviewpost")
+    public String reviewPost(@PathVariable("id") Integer restaurantId, Model model) {
+        model.addAttribute("reviewForm", new ReviewForm());
+        model.addAttribute("restaurant", restaurantService.findById(restaurantId));
+        return "restaurants/reviewpost";
+    }
+    
+    @PostMapping("/restaurants/{id}/reviewpost")
+    public String reviewPost(@PathVariable("id") Integer restaurantId, @ModelAttribute @Valid ReviewForm reviewForm, BindingResult result, Model model, Principal principal) {
+        if (result.hasErrors()) {
+            model.addAttribute("restaurant", restaurantService.findById(restaurantId));
+            return "restaurants/reviewpost";
+        }
+        
+        reviewService.saveReview(restaurantId, reviewForm, principal.getName());
+        return "redirect:/restaurants/" + restaurantId + "/show";
+    }
+    
+    @GetMapping("/restaurants/{id}/reviewedit")
+    public String reviewEdit(@PathVariable("id") Integer restaurantId, Model model) {
+        model.addAttribute("reviewForm", new ReviewForm());
+        model.addAttribute("restaurant", restaurantService.findById(restaurantId));
+        return "restaurants/reviewedit";
+    }
+    
+    @PostMapping("/restaurants/{id}/reviewedit")
+    public String reviewEdit(@PathVariable("id") Integer restaurantId, @ModelAttribute @Valid ReviewForm reviewForm, BindingResult result, Model model, Principal principal) {
+        if (result.hasErrors()) {
+            model.addAttribute("restaurant", restaurantService.findById(restaurantId));
+            return "restaurants/reviewedit";
+        }
+        
+        reviewService.saveReview(restaurantId, reviewForm, principal.getName());
+        return "redirect:/restaurants/" + restaurantId + "/show";
+    }
+    
+    @GetMapping("/restaurants/{id}/reviews")
+    public String reviewList(@PathVariable("id") Integer restaurantId, Model model, @PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable) {
+    	Page<Review> reviewPage = reviewRepository.findByRestaurant_IdOrderByScoreDesc(restaurantId, pageable);
+    	Restaurant restaurant = restaurantService.findById(restaurantId);
+    	
+    	model.addAttribute("reviewPage", reviewPage);
+		model.addAttribute("restaurant", restaurant);
+    	
+    	return "restaurants/review";
+    }
+}
